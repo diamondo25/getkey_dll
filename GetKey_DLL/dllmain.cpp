@@ -135,57 +135,52 @@ void Run() {
 
 	if ((verSize = GetFileVersionInfoSizeA(exeName, &verHandle)) != NULL) {
 		LPSTR verData = new char[verSize];
-		if (GetFileVersionInfoA(exeName, verHandle, verSize, verData))
+		if (GetFileVersionInfoA(exeName, verHandle, verSize, verData) &&
+			VerQueryValueA(verData, "\\", (VOID FAR* FAR*)&lpBuffer, &size) && size)
 		{
-			if (VerQueryValueA(verData, "\\", (VOID FAR* FAR*)&lpBuffer, &size))
+			VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
+			if (verInfo->dwSignature == 0xfeef04bd)
 			{
-				if (size)
-				{
-					VS_FIXEDFILEINFO *verInfo = (VS_FIXEDFILEINFO *)lpBuffer;
-					if (verInfo->dwSignature == 0xfeef04bd)
-					{
-						locale = HIWORD(verInfo->dwFileVersionMS);
-						version = LOWORD(verInfo->dwFileVersionMS);
-						subversion = HIWORD(verInfo->dwFileVersionLS);
-						prollyTest = LOWORD(verInfo->dwFileVersionLS);
+				locale = HIWORD(verInfo->dwFileVersionMS);
+				version = LOWORD(verInfo->dwFileVersionMS);
+				subversion = HIWORD(verInfo->dwFileVersionLS);
+				prollyTest = LOWORD(verInfo->dwFileVersionLS);
 
-						if (locale == 1 && version == 0 && subversion == 0 && prollyTest == 1) {
-							MessageBoxA(NULL, "Unsupported version (very old?)!", "GetKey_DLL", MB_OK);
-							return;
-						}
-
-						switch (locale) {
-						case 1:
-						case 8:
-						{
-							delete[] verData;
-
-							char* buffer = new char[100];
-							sprintf_s(buffer, 100, "Executable version %d.%d locale %d", version, subversion, locale);
-							MessageBoxA(NULL, buffer, "GetKey_DLL", MB_OK);
-							delete[] buffer;
-							break;
-						}
-						default:
-						{
-							delete[] verData;
-
-							char* buffer = new char[100];
-							sprintf_s(buffer, 100, "Unsupported locale! Version %d.%d locale %d. Still want to try, tho?", version, subversion, locale);
-							bool doContinue = MessageBoxA(NULL, buffer, "GetKey_DLL", MB_YESNO) == IDYES;
-							delete[] buffer;
-
-							if (doContinue)
-								break;
-							else
-								return;
-						}
-						}
-						
-						isKms = locale == 1;
-
-					}
+				if (locale == 1 && version == 0 && subversion == 0 && prollyTest == 1) {
+					MessageBoxA(NULL, "Unsupported version (very old?)!", "GetKey_DLL", MB_OK);
+					return;
 				}
+
+				switch (locale) {
+				case 1:
+				case 8:
+				{
+					delete[] verData;
+
+					char* buffer = new char[100];
+					sprintf_s(buffer, 100, "Executable version %d.%d locale %d", version, subversion, locale);
+					MessageBoxA(NULL, buffer, "GetKey_DLL", MB_OK);
+					delete[] buffer;
+					break;
+				}
+				default:
+				{
+					delete[] verData;
+
+					char* buffer = new char[100];
+					sprintf_s(buffer, 100, "Unsupported locale! Version %d.%d locale %d. Still want to try, tho?", version, subversion, locale);
+					bool doContinue = MessageBoxA(NULL, buffer, "GetKey_DLL", MB_YESNO) == IDYES;
+					delete[] buffer;
+
+					if (doContinue)
+						break;
+					else
+						return;
+				}
+				}
+						
+				isKms = locale == 1;
+
 			}
 		}
 		delete[] verData;
@@ -206,6 +201,7 @@ void Run() {
 		MessageBoxA(NULL, buffer, "GetKey_DLL", MB_OK);
 		delete[] buffer;
 	}
+
 	uchar* address = SeekAoB(0x00400000, ArrayOfBytes, AOB_LENGTH);
 	if (address == 0) {
 
@@ -216,8 +212,6 @@ void Run() {
 	}
 
 	if (address != 0) {
-
-
 		{
 			char* buffer = new char[100];
 			sprintf_s(buffer, 100, "CAESCipher::Encrypt is at %08X", address);
@@ -234,5 +228,6 @@ void Run() {
 
 		ShowAESKey(originalKey);
 	}
+
 	ShowCloseWindow();
 }
