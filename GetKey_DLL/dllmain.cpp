@@ -15,7 +15,7 @@ uchar* ArrayOfBytes = new uchar[AOB_LENGTH] {
 	0x89, 0x84, 0x24, 0x38, 0x01, 0x00, 0x00	// mov [esp+13Ch-4], eax
 };
 
-// IDA AoB: 81 EC 3C 01 00 00 A1 ? ? ? ? 33 ?
+// IDA AoB: 55 8B EC 81 EC 3C 01 00 00 A1 ? ? ? ? 33 C5
 #define AOB_LENGTH_TWMS 16
 uchar* ArrayOfBytesTWMS = new uchar[AOB_LENGTH_TWMS] {
 	0x55,										// push ebp
