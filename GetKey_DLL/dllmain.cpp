@@ -8,7 +8,7 @@
 
 // IDA AoB: 81 EC 3C 01 00 00 A1 ? ? ? 01 33 C4 89 84 24 38 01 00 00 
 #define AOB_LENGTH 20
-uchar* ArrayOfBytes = new uchar[AOB_LENGTH] {
+uchar* ArrayOfBytes = new uchar[AOB_LENGTH]{
 	0x81, 0xEC, 0x3C, 0x01, 0x00, 0x00,			// sub esp, 13Ch
 	0xA1, 0xFF, 0xFF, 0xFF, 0xFF,				// mov eax, something
 	0x33, 0xC4,									// xor eax, esp
@@ -17,7 +17,7 @@ uchar* ArrayOfBytes = new uchar[AOB_LENGTH] {
 
 // IDA AoB: 55 8B EC 81 EC 3C 01 00 00 A1 ? ? ? ? 33 C5
 #define AOB_LENGTH_TWMS 16
-uchar* ArrayOfBytesTWMS = new uchar[AOB_LENGTH_TWMS] {
+uchar* ArrayOfBytesTWMS = new uchar[AOB_LENGTH_TWMS]{
 	0x55,										// push ebp
 	0x8B, 0xEC,									// mob ebp, esp
 	0x81, 0xEC, 0x3C, 0x01, 0x00, 0x00,			// sub esp, 13Ch
@@ -33,23 +33,24 @@ uchar* ArrayOfBytesTWMS = new uchar[AOB_LENGTH_TWMS] {
 // V142.1: 00494C00 - such gap. wow. Downveil update; Secondary stat moved 400k bytes down. Different precompiled header?
 // V149.2: 0049A9C0
 
+
 void Run();
 
 typedef void(*CAESCipher_Encrypt)(int, int, size_t, int);
 typedef void(*CAESCipher_Encrypt_KOR)(int, int, size_t, int, int pEncrypt);
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-					 )
+BOOL APIENTRY DllMain(HMODULE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved
+	)
 {
 	switch (ul_reason_for_call)
 	{
-		case DLL_PROCESS_ATTACH: Run(); break;
-		case DLL_THREAD_ATTACH:
-		case DLL_THREAD_DETACH:
-		case DLL_PROCESS_DETACH:
-			break;
+	case DLL_PROCESS_ATTACH: Run(); break;
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
 	}
 	return TRUE;
 }
@@ -61,7 +62,6 @@ uchar* SeekAoB(int startAddr, uchar *aob, int aobLen) {
 	int i = 0;
 	for (; i < 0x01000000; i++) {
 		bool found = true;
-
 		for (int j = 0; j < aobLen; j++) {
 			if (aob[j] == (uchar)0xFF) continue;
 			if (currentAddress[j] != aob[j]) {
@@ -103,14 +103,14 @@ void ShowCloseWindow() {
 }
 
 uchar* FindOriginalAESKey() {
-	uchar *aob = new uchar[] {
+	uchar *aob = new uchar[8]{
 		0x13, 0x00, 0x00, 0x00, 0x52, 0x00, 0x00, 0x00
 	};
 	return SeekAoB(0x01000000, aob, 8);
 }
 
 uchar* FindChangedAESKey() {
-	uchar *aob = new uchar[] {
+	uchar *aob = new uchar[8]{
 		0xEC, 0x3F, 0x77, 0xA4, 0x45, 0xD0, 0x71, 0xBF
 	};
 	auto result = SeekAoB(0x01000000, aob, 8);
@@ -155,7 +155,6 @@ void Run() {
 				case 1:
 				case 8:
 				{
-					delete[] verData;
 
 					char* buffer = new char[100];
 					sprintf_s(buffer, 100, "Executable version %d.%d locale %d", version, subversion, locale);
@@ -165,7 +164,6 @@ void Run() {
 				}
 				default:
 				{
-					delete[] verData;
 
 					char* buffer = new char[100];
 					sprintf_s(buffer, 100, "Unsupported locale! Version %d.%d locale %d. Still want to try, tho?", version, subversion, locale);
@@ -178,13 +176,14 @@ void Run() {
 						return;
 				}
 				}
-						
+
 				isKms = locale == 1;
 
 			}
 		}
 		delete[] verData;
 	}
+
 	uchar* originalKey = FindOriginalAESKey();
 
 	if (originalKey == 0) {
